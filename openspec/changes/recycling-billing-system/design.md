@@ -91,43 +91,93 @@ recycling-billing-system/
 
 ### 2. 資料模型
 
-┌──────────────┐       ┌──────────────┐       ┌──────────────┐
-│   Customer   │──1:N──│   Contract   │──1:N──│ContractItem  │
-│──────────────│       │──────────────│       │──────────────│
-│ id           │       │ id           │       │ id           │
-│ name         │       │ customer_id  │       │ contract_id  │
-│ email        │       │ start_date   │       │ item_name    │
-│ line_id      │       │ end_date     │       │ unit_price   │
-│ notify_method│       │ type         │       │ price_type   │
-└──────────────┘       └──────────────┘       └──────────────┘
-│
-│ 1:N
-▼
-┌──────────────┐       ┌──────────────┐
-│ Transaction  │──1:N──│TransactionItem│
-│──────────────│       │──────────────│
-│ id           │       │ id           │
-│ customer_id  │       │ transaction_id│
-│ date         │       │ item_name    │
-│ trip_number  │       │ quantity     │
-│ vehicle_no   │       │ unit_price   │
-│ driver       │       │ subtotal     │
-│ total_amount │       │ price_source │
-└──────────────┘       └──────────────┘
-│
-│ 1:1
-▼
-┌──────────────┐
-│   Payment    │
-│──────────────│
-│ id           │
-│ customer_id  │
-│ year_month   │
-│ total_receivable│
-│ total_payable│
-│ status       │
-│ paid_date    │
-└──────────────┘
+**客戶 (Customer)**
+```
+┌────────────────────┐
+│      Customer      │
+│────────────────────│
+│ id                 │
+│ short_name         │  ← 簡稱（廠商名稱）
+│ erp_name           │  ← ERP 名稱
+│ payment_type       │  ← 收付款類型（收/付）
+│ requires_invoice   │  ← 是否開發票
+│ invoice_company    │  ← 發票開立公司別
+│ invoice_title      │  ← 發票抬頭
+│ tax_id             │  ← 統編
+│ payment_terms      │  ← 付款期限（次月10前/月結60天等）
+│ trip_unit_price    │  ← 車趟單價
+│ collection_freq    │  ← 清運頻率
+│ notify_method      │  ← 通知方式（LINE/MAIL/電話/司機親送）
+│ line_id            │  ← LINE ID
+│ email              │
+│ phone              │
+│ mailing_address    │  ← 寄送地址
+│ notes              │  ← 備註
+│ created_at         │
+│ updated_at         │
+└────────────────────┘
+```
+
+**附加費用設定 (CustomerFee)**
+```
+┌────────────────────┐
+│    CustomerFee     │
+│────────────────────│
+│ id                 │
+│ customer_id        │
+│ fee_name           │  ← 費用名稱（保麗龍、冷盤、PE膜、大白桶等）
+│ fee_type           │  ← 計費方式（per_month/per_trip/per_vehicle）
+│ unit_price         │  ← 單價
+└────────────────────┘
+```
+
+**合約 (Contract) - 適用於有簽約客戶**
+```
+┌────────────────────┐       ┌────────────────────┐
+│     Contract       │──1:N──│   ContractItem     │
+│────────────────────│       │────────────────────│
+│ id                 │       │ id                 │
+│ customer_id        │       │ contract_id        │
+│ start_date         │       │ item_name          │
+│ end_date           │       │ unit_price         │
+│ type (年約/季約)    │       │ price_type (+/-)   │
+│ status             │       └────────────────────┘
+└────────────────────┘
+```
+
+**交易紀錄 (Transaction)**
+```
+┌────────────────────┐       ┌────────────────────┐
+│    Transaction     │──1:N──│  TransactionItem   │
+│────────────────────│       │────────────────────│
+│ id                 │       │ id                 │
+│ customer_id        │       │ transaction_id     │
+│ date               │       │ item_name          │
+│ trip_number        │       │ quantity           │
+│ vehicle_no         │       │ unit_price         │
+│ driver             │       │ subtotal           │
+│ total_amount       │       │ price_source       │
+│ payment_type (+/-) │       │ (contract/floating)│
+└────────────────────┘       └────────────────────┘
+```
+
+**月結收付款 (Payment)**
+```
+┌────────────────────┐
+│      Payment       │
+│────────────────────│
+│ id                 │
+│ customer_id        │
+│ year_month         │
+│ total_receivable   │  ← 應收
+│ total_payable      │  ← 應付
+│ net_amount         │  ← 結餘
+│ status             │  ← 未收款/已收款
+│ due_date           │  ← 應付日期（依客戶付款期限計算）
+│ paid_date          │
+│ paid_amount        │
+└────────────────────┘
+```
 
 
 
@@ -135,11 +185,36 @@ recycling-billing-system/
 
 **決定：CSV 匯入優先，預留 API 擴充**
 
-匯入流程：
+**既有客戶資料 CSV 格式（已確認）：**
+| 欄位 | 說明 | 範例 |
+|------|------|------|
+| 廠商名稱 | 客戶簡稱 | 王子製藥 |
+| zcar/ERP名稱 | ERP 系統名稱 | 王子製藥-新埔廠 |
+| 收付款類型 | 收/付 | 收 |
+| 是否開發票 | 是/否 | 是 |
+| 發票開立公司別 | 開票公司 | 新竹 |
+| 款項支付方式 | 付款期限 | 匯款 (次月10前) |
+| 車趟單價 | 每趟費用 | 2000 |
+| 保麗龍費用 | 附加費 | 保麗龍500/月 |
+| 冷盤費用 | 附加費 | 冷盤500/月 |
+| 其他附加費用 | 其他費用 | PE膜2500/車 |
+| 清運頻率 | 收運週期 | 每週二.五 |
+| 款項通知方式 | 通知管道 | LINE/MAIL/電話/司機親送 |
+| LINE_Notify_Token | LINE Token | - |
+| Email | 電子郵件 | - |
+| 電話 | 聯絡電話 | - |
+| 發票抬頭 | 發票名稱 | 王子製藥(股)公司 |
+| 統編 | 統一編號 | 35048803 |
+| 寄送地址 | 帳單地址 | - |
+| 付款期限 | 同款項支付方式 | - |
+| 備註 | 其他說明 | - |
+
+**匯入流程：**
 1. 使用者上傳 CSV（日期、客戶、趟次、車號、司機）
-2. 系統比對客戶名稱，建立或關聯
+2. 系統比對客戶名稱（廠商名稱 或 ERP名稱），建立或關聯
 3. 產生交易紀錄骨架（待填入品項）
-4. 使用者補填品項、數量、確認價格
+4. 系統自動帶入客戶的車趟單價與附加費用
+5. 使用者補填品項、數量、確認價格
 
 ### 4. 價格計算邏輯
 
@@ -163,6 +238,14 @@ recycling-billing-system/
 - Email：SendGrid 或 AWS SES
 - LINE：LINE Messaging API（功能完整）
 
+**客戶通知方式（依既有資料）：**
+| 方式 | 說明 |
+|------|------|
+| LINE | 透過 LINE Messaging API 發送 |
+| MAIL | 透過 Email 發送（可附加 PDF） |
+| 電話 | 系統產生通知，人工電話聯繫 |
+| 司機親送 | 系統產生請款單，由司機親自送達 |
+
 **通知觸發點：**
 | 事件 | 對象 | 時機 |
 |------|------|------|
@@ -175,6 +258,7 @@ recycling-billing-system/
 2. 使用者人工審核內容
 3. 確認後點擊發送（支援批次發送）
 4. Email 自動附加 PDF 對帳單
+5. 司機親送：列印請款單供司機攜帶
 
 ### 6. 報表產生
 
@@ -210,7 +294,8 @@ recycling-billing-system/
 
 ## Open Questions
 
-1. 既有排程系統的 CSV 匯出格式為何？需要取得範例檔案
-2. LINE 通知要用 LINE Notify（免費但功能少）還是 LINE Messaging API（需付費）？
+1. ~~既有排程系統的 CSV 匯出格式為何？需要取得範例檔案~~ → **已確認：客戶資料 CSV 格式已取得**
+2. ~~LINE 通知要用 LINE Notify 還是 LINE Messaging API？~~ → **已確認：LINE Messaging API**
 3. ~~月結週期是每月幾號結算？~~ → **已確認：每月 15 日左右**
 4. 未收款提醒要在超過幾天後發送？
+5. 排程系統的車趟 CSV 格式為何？（日期、客戶、趟次、車號、司機等欄位順序）

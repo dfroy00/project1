@@ -12,18 +12,30 @@
 
 ## Phase 1: 客戶管理 (customer-management)
 
-- [ ] 建立 Customer Prisma Model
+- [ ] 建立 Customer Prisma Model（含完整欄位）
+  - [ ] short_name, erp_name, payment_type, tax_id, invoice_title 等
+- [ ] 建立 CustomerFee Prisma Model（附加費用）
 - [ ] 建立客戶 API Routes (CRUD)
   - [ ] POST /api/customers - 建立客戶
   - [ ] GET /api/customers - 查詢客戶列表
   - [ ] GET /api/customers/[id] - 取得單一客戶
   - [ ] PUT /api/customers/[id] - 更新客戶
   - [ ] DELETE /api/customers/[id] - 刪除客戶
+- [ ] 建立客戶附加費用 API Routes
+  - [ ] POST /api/customers/[id]/fees - 新增附加費用
+  - [ ] PUT /api/customers/[id]/fees/[feeId] - 更新附加費用
+  - [ ] DELETE /api/customers/[id]/fees/[feeId] - 刪除附加費用
 - [ ] 建立客戶 Zod Schema
 - [ ] 建立客戶列表頁面 (/customers)
 - [ ] 建立客戶新增/編輯表單元件
-- [ ] 實作客戶搜尋功能
-- [ ] 實作通知方式設定 (Email/LINE)
+- [ ] 實作客戶搜尋功能（廠商名稱 + ERP 名稱）
+- [ ] 實作收付款類型篩選
+- [ ] 實作通知方式設定 (LINE/MAIL/電話/司機親送)
+- [ ] 建立附加費用管理介面
+- [ ] 實作客戶 CSV 匯入功能
+  - [ ] POST /api/customers/import - 匯入客戶 CSV
+  - [ ] 建立匯入預覽頁面
+  - [ ] 實作欄位對應
 
 ## Phase 2: 合約管理 (contract-management)
 
@@ -129,6 +141,11 @@
   - [ ] 待審核列表
   - [ ] 預覽通知內容
   - [ ] 單筆/批次發送功能
+- [ ] 實作各通知管道
+  - [ ] LINE 發送
+  - [ ] Email 發送（含 PDF 附件）
+  - [ ] 電話通知清單產生
+  - [ ] 司機親送請款單列印
 - [ ] 實作排程產生待審核通知 (每月 15 日左右)
 - [ ] 建立通知歷史紀錄頁面
 
