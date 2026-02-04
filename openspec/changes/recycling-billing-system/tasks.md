@@ -106,23 +106,31 @@
 
 ## Phase 7: 通知系統 (notification-system)
 
+- [ ] 建立 Notification Prisma Model (含待審核狀態)
 - [ ] 設定 Email 服務 (SendGrid)
   - [ ] 建立 SendGrid 帳號
   - [ ] 設定 API Key
-  - [ ] 建立 Email 發送工具
+  - [ ] 建立 Email 發送工具（支援附件）
 - [ ] 設定 LINE Messaging API
   - [ ] 建立 LINE Official Account
   - [ ] 設定 Channel Access Token
   - [ ] 建立 LINE 發送工具
 - [ ] 建立通知 API Routes
-  - [ ] POST /api/notifications/send - 發送通知
-  - [ ] GET /api/notifications - 查詢通知紀錄
+  - [ ] GET /api/notifications - 查詢通知紀錄（含待審核）
+  - [ ] GET /api/notifications/pending - 查詢待審核通知
+  - [ ] POST /api/notifications/[id]/approve - 審核通過並發送
+  - [ ] POST /api/notifications/batch-approve - 批次審核發送
+  - [ ] DELETE /api/notifications/[id] - 取消通知
 - [ ] 建立通知模板
-  - [ ] 月結帳單通知模板
+  - [ ] 月結帳單通知模板（附加 PDF）
   - [ ] 未收款提醒模板
   - [ ] 合約到期提醒模板
-- [ ] 實作排程通知 (cron job 或 Vercel Cron)
-- [ ] 建立通知紀錄頁面 (/notifications)
+- [ ] 建立通知審核頁面 (/notifications)
+  - [ ] 待審核列表
+  - [ ] 預覽通知內容
+  - [ ] 單筆/批次發送功能
+- [ ] 實作排程產生待審核通知 (每月 15 日左右)
+- [ ] 建立通知歷史紀錄頁面
 
 ## Phase 8: 整合與測試
 

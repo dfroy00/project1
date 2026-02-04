@@ -19,7 +19,7 @@
 - `transaction-records`: 交易紀錄管理，含品項、數量、價格（合約價或浮動價）
 - `monthly-billing`: 月結報表產生，依趟次呈現，輸出 PDF/Excel
 - `payment-tracking`: 收付款狀態追蹤（月結）
-- `notification-system`: 通知系統，支援 Email/LINE，含帳單通知、未收款提醒、合約到期提醒
+- `notification-system`: 通知系統，支援 Email（含附件）/LINE，人工審核後發送，含帳單通知、未收款提醒、合約到期提醒
 
 ### Modified Capabilities
 
